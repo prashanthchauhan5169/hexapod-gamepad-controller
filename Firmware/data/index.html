@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no" />
+  <title>ESP32 Virtual Gamepad</title>
+  <meta name="description" content="Virtual Xbox-style gamepad controller for ESP32 servo motor control" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Orbitron:wght@400;500;600;700;800;900&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <!-- Floating Edit Toolbar -->
+  <div id="editActions" class="edit-actions hidden floating-toolbar">
+    <button id="btnResetLayout" class="ctrl-btn reset-btn">Reset Layout</button>
+  </div>
+
+  <!-- Main Controller -->
+  <main class="controller-wrapper">
+    <!-- Connection Status Badge -->
+    <div id="connStatus" class="connection-badge status-connecting" title="WebSocket Status"></div>
+
+    <div class="controller-body">
+
+      <!-- ═══════════ LEFT SECTION ═══════════ -->
+      <div class="controller-left">
+
+        <!-- Component: Left Bumper & Trigger -->
+        <div class="component-group bumper-trigger-group left-bt" id="groupLeftBumpers">
+          <div class="drag-overlay"></div>
+          <div class="resize-handle"></div>
+          <button class="hide-toggle" title="Toggle Visibility">👁️</button>
+          <button class="bumper-btn" id="btnLB" data-button="LB">LB</button>
+          <button class="trigger-btn" id="btnLT" data-button="LT">
+            <span class="trigger-label">LT</span>
+            <div class="trigger-fill" id="ltFill"></div>
+          </button>
+        </div>
+
+        <!-- Component: Left Analog Stick (LLS) -->
+        <div class="component-group joystick-group" id="groupLeftStick">
+          <div class="drag-overlay"></div>
+          <div class="resize-handle"></div>
+          <button class="hide-toggle" title="Toggle Visibility">👁️</button>
+          <div class="joystick-label">L</div>
+          <div class="joystick-container" id="leftStickContainer">
+            <div class="joystick-range-ring"></div>
+            <div class="joystick-crosshair"></div>
+            <div class="joystick-thumb" id="leftStickThumb">
+              <div class="joystick-thumb-inner"></div>
+            </div>
+          </div>
+          <div class="joystick-readout">
+            <span id="leftStickX">X: 0</span>
+            <span id="leftStickY">Y: 0</span>
+          </div>
+        </div>
+
+        <!-- Component: D-Pad -->
+        <div class="component-group dpad-group" id="groupDpad">
+          <div class="drag-overlay"></div>
+          <div class="resize-handle"></div>
+          <button class="hide-toggle" title="Toggle Visibility">👁️</button>
+          <div class="dpad">
+            <button class="dpad-btn dpad-up" id="btnDpadUp" data-button="DPAD_UP">
+              <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor"><path d="M7 14l5-5 5 5z"/></svg>
+            </button>
+            <button class="dpad-btn dpad-right" id="btnDpadRight" data-button="DPAD_RIGHT">
+              <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor"><path d="M10 17l5-5-5-5z"/></svg>
+            </button>
+            <button class="dpad-btn dpad-down" id="btnDpadDown" data-button="DPAD_DOWN">
+              <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor"><path d="M7 10l5 5 5-5z"/></svg>
+            </button>
+            <button class="dpad-btn dpad-left" id="btnDpadLeft" data-button="DPAD_LEFT">
+              <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor"><path d="M14 7l-5 5 5 5z"/></svg>
+            </button>
+            <div class="dpad-center"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ═══════════ CENTER SECTION ═══════════ -->
+      <div class="controller-center">
+        <!-- Component: Menu Buttons -->
+        <div class="component-group menu-group" id="groupMenu">
+          <div class="drag-overlay"></div>
+          <div class="resize-handle"></div>
+          <button class="hide-toggle" title="Toggle Visibility">👁️</button>
+          <button class="menu-btn" id="btnFullscreen" title="Toggle Fullscreen">
+            <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor">
+              <path d="M5 5h5v2H7v3H5V5zm9 0h5v5h-2V7h-3V5zm5 14h-5v-2h3v-3h2v5zm-14 0v-5h2v3h3v2H5z"/>
+            </svg>
+          </button>
+          <button class="xbox-btn" id="btnEditMode" title="Toggle Edit Mode">
+            <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor">
+              <path d="M6.43 3.72C7.56 4.46 8.53 5.84 8.53 5.84C8.53 5.84 5.27 9.5 3.67 13.96C2.13 18.22 3.68 20.31 3.68 20.31C1.58 18.07 .39 15.09 .39 12C.39 8.45 2.42 5.17 6.43 3.72M11.93 1C10.59 1 9.01 2.17 9.01 2.17C9.01 2.17 10.37 3.69 11.35 5.17C12.07 6.26 12.83 7.65 12.83 7.65C12.83 7.65 13.59 6.26 14.31 5.17C15.29 3.69 16.65 2.17 16.65 2.17C16.65 2.17 15.07 1 13.73 1H11.93M17.23 3.72C21.24 5.17 23.27 8.45 23.27 12C23.27 15.09 22.08 18.07 19.98 20.31C19.98 20.31 21.53 18.22 19.99 13.96C18.39 9.5 15.13 5.84 15.13 5.84C15.13 5.84 16.1 4.46 17.23 3.72M12 9.04C12 9.04 8.29 14.25 7.28 17.85C6 22.36 8.46 23.65 11.83 23.65H12.17C15.54 23.65 18 22.36 16.72 17.85C15.71 14.25 12 9.04 12 9.04Z"/>
+            </svg>
+          </button>
+          <button class="menu-btn" id="btnStart" data-button="START">
+            <svg viewBox="0 0 24 24" width="14" height="14" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
+          </button>
+        </div>
+      </div>
+
+      <!-- ═══════════ RIGHT SECTION ═══════════ -->
+      <div class="controller-right">
+
+        <!-- Component: Right Bumper & Trigger -->
+        <div class="component-group bumper-trigger-group right-bt" id="groupRightBumpers">
+          <div class="drag-overlay"></div>
+          <div class="resize-handle"></div>
+          <button class="hide-toggle" title="Toggle Visibility">👁️</button>
+          <button class="bumper-btn" id="btnRB" data-button="RB">RB</button>
+          <button class="trigger-btn" id="btnRT" data-button="RT">
+            <span class="trigger-label">RT</span>
+            <div class="trigger-fill" id="rtFill"></div>
+          </button>
+        </div>
+
+        <!-- Component: Face Buttons (A, B, X, Y) -->
+        <div class="component-group face-buttons-group" id="groupFaceButtons">
+          <div class="drag-overlay"></div>
+          <div class="resize-handle"></div>
+          <button class="hide-toggle" title="Toggle Visibility">👁️</button>
+          <div class="face-buttons">
+            <button class="face-btn face-y" id="btnY" data-button="Y">Y</button>
+            <button class="face-btn face-b" id="btnB" data-button="B">B</button>
+            <button class="face-btn face-a" id="btnA" data-button="A">A</button>
+            <button class="face-btn face-x" id="btnX" data-button="X">X</button>
+          </div>
+        </div>
+
+        <!-- Component: Right Analog Stick (RLS) -->
+        <div class="component-group joystick-group" id="groupRightStick">
+          <div class="drag-overlay"></div>
+          <div class="resize-handle"></div>
+          <button class="hide-toggle" title="Toggle Visibility">👁️</button>
+          <div class="joystick-label">R</div>
+          <div class="joystick-container" id="rightStickContainer">
+            <div class="joystick-range-ring"></div>
+            <div class="joystick-crosshair"></div>
+            <div class="joystick-thumb" id="rightStickThumb">
+              <div class="joystick-thumb-inner"></div>
+            </div>
+          </div>
+          <div class="joystick-readout">
+            <span id="rightStickX">X: 0</span>
+            <span id="rightStickY">Y: 0</span>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </main>
+
+
+
+  <!-- Portrait Warning Overlay -->
+  <div class="portrait-warning">
+    <div class="portrait-warning-content">
+      <svg viewBox="0 0 24 24" width="48" height="48" fill="currentColor">
+        <path d="M16.48 2.52c3.27 1.55 5.61 4.72 5.97 8.48h1.5C23.44 4.84 18.29 0 12 0l-.66.03 3.81 3.81 1.33-1.32zm-6.25-.03c-.59-.05-1.19-.05-1.78.02-6.52.82-11.4 6.64-10.93 13.23.45 6.32 5.76 11.36 12.11 11.75 6.44.4 11.85-4.32 12.35-10.49h-1.5c-.47 5.25-4.99 9.32-10.4 9.02-5.46-.3-9.98-4.72-10.38-10.15-.41-5.61 3.85-10.51 9.4-11.23.63-.08 1.28-.08 1.93.01l-2.02 2.02 1.06 1.06 4.24-4.24-4.24-4.24-1.06 1.06 1.23 1.23z"/>
+      </svg>
+      <h2>Please Rotate Your Device</h2>
+      <p>This virtual gamepad is optimized for landscape orientation.</p>
+    </div>
+  </div>
+
+  <script src="hexapod.js"></script>
+  <script src="websocket.js"></script>
+  <script src="controller.js"></script>
+</body>
+</html>
